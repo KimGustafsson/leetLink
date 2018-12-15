@@ -1,0 +1,23 @@
+{
+  "name": "leetlink",
+  "version": "1.0.0",
+  "description": "Url shortener service",
+  "main": "index.html",
+  "dependencies": {
+    "parcel-bundler": "^1.11.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KimGustafsson/leetLink.git"
+  },
+  "author": "Kim Gustafsson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KimGustafsson/leetLink/issues"
+  },
+  "homepage": "https://github.com/KimGustafsson/leetLink#readme"
+}
