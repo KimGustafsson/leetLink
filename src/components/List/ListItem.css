@@ -1,0 +1,11 @@
+li {
+    border: 1px solid grey;
+    list-style: none;
+    text-align: left;
+}
+
+a {
+    color: white;
+    text-decoration: none;
+
+}
