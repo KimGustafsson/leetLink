@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import './App.css';
+import styles from './App.module.css';
 import Form from './components/Form/Form.js';
-import List from './components/List/List';
-
-// const apiPathGenerate = 'http://ec2-3-17-28-164.us-east-2.compute.amazonaws.com:9000/api/generate/';
-const apiPathGenerate = 'http://localhost:9000/api/generate/';
+import List from './components/List/List.js';
+const apiPathGenerate = 'http://ec2-3-17-28-164.us-east-2.compute.amazonaws.com:9000/api/generate/';
+// const apiPathGenerate = 'http://localhost:9000/api/generate/';
+const storage = window.localStorage;
 
 class App extends Component {
   constructor(props) {
@@ -12,59 +12,78 @@ class App extends Component {
     this.state = {
       url: '',
       generatedUrl: '',
-      latestUrls: [],
+      latestUrls: storage.latestUrls ? JSON.parse(storage.latestUrls) : [],
     };
-    this.onChange = this.onChange.bind(this);
-    this.onSubmit = this.onSubmit.bind(this);
-    this.addToList = this.addToList.bind(this);
   }
 
-  onChange(val) {
+  // Save url list in localStorage
+  saveInStorage = (list) => {
+    storage.clear();
+    storage.setItem('latestUrls', JSON.stringify(list));
+  }
+
+  // Save input to state
+  onChange = (val) => {
     this.setState({
       url: val,
     });
   }
 
-  onSubmit() {
-    console.log('Submitting: ', this.state.url);
-    fetch(apiPathGenerate, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        url: this.state.url,
-      })
-    })
-      .then((response) => response.json())
-      .then((result) => {
-        console.log(result);
-        this.setState({
-          generatedUrl: result.generatedUrl,
-        });
-        this.addToList({
+  // Post input to server to be saved in the database
+  onSubmit = () => {
+    if (this.state.url !== '') {
+      console.log('Submitting: ', this.state.url);
+      fetch(apiPathGenerate, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           url: this.state.url,
-          generatedUrl: result.generatedUrl
+        })
+      })
+        .then((response) => response.json())
+        .then((result) => {
+          console.log(result);
+          this.setState({
+            generatedUrl: result.generatedUrl,
+          });
+          this.addToList({
+            url: this.state.url,
+            generatedUrl: result.generatedUrl
+          });
         });
-      });
+    }
   };
 
-  addToList(item) {
+  // Updates url list in localStorage
+  addToList = (item) => {
+    let newList;
+    if (this.state.latestUrls.length < 10) {
+      newList = [item, ...this.state.latestUrls];
+    }
+    else {
+      newList = this.state.latestUrls.filter((url) => {
+        return url !== this.state.latestUrls[9];
+      });
+      newList.unshift(item);
+    }
     this.setState({
-      latestUrls: [...this.state.latestUrls, item],
+      latestUrls: newList,
     });
+    this.saveInStorage(this.state.latestUrls);
   }
 
   render() {
-    const generatedUrl = this.state.generatedUrl;
     return (
-      <div className="App">
-        <div className="App-body">
-          <h1 className="App-name" >leetLink</h1>
+      <div className={styles.app}>
+        <div className={styles.app_header}>
+          <h1 className={styles.app_name} >leetLink</h1>
+        </div>
+        <div className={styles.app_body}>
           <Form url={this.state.url} onChange={this.onChange} onSubmit={this.onSubmit}></Form>
           <div>
-            <p>This is the generated url: <a className="generated-url" href={generatedUrl}>{generatedUrl}</a></p>
           </div>
           <List latestUrls={this.state.latestUrls}></List>
         </div>
